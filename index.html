@@ -1,0 +1,576 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d18">
+<title>HAZEl Scientific Calculator</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #080d18;
+  --panel: #111a2a;
+  --btn: #1a263b;
+  --text: #f3f6ff;
+  --muted: #8493ad;
+  --blue: #3985ff;
+  --gold: #e4bd68;
+  --border: #26334b;
+}
+
+body {
+  min-height: 100vh;
+  padding: 22px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at top, #142b4b, transparent 55%),
+    var(--bg);
+  color: var(--text);
+  font-family: Inter, Arial, sans-serif;
+}
+
+.app {
+  width: 100%;
+  max-width: 440px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.logo span { color: var(--gold); }
+
+.subtitle {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.status {
+  color: var(--gold);
+  font-size: 11px;
+  border: 1px solid #6e592f;
+  border-radius: 20px;
+  padding: 7px 10px;
+}
+
+.calculator {
+  padding: 20px;
+  background: linear-gradient(145deg, #131e31, #0d1422);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  box-shadow: 0 25px 70px #0007;
+}
+
+.display {
+  min-height: 155px;
+  padding: 15px 5px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+.previous {
+  min-height: 22px;
+  width: 100%;
+  text-align: right;
+  color: var(--muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.current {
+  width: 100%;
+  text-align: right;
+  font-size: clamp(30px, 9vw, 43px);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  margin-top: 12px;
+}
+
+.modebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0 15px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.modebar button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--gold);
+  padding: 7px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+button.key {
+  height: 57px;
+  border: 1px solid #ffffff08;
+  border-radius: 15px;
+  background: var(--btn);
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform .12s, background .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button.key:active {
+  transform: scale(.94);
+  background: #30415c;
+}
+
+button.function {
+  color: #9fc2ff;
+  font-size: 15px;
+}
+
+button.operator {
+  color: var(--gold);
+  background: #30291e;
+}
+
+button.clear {
+  color: #ff8c9b;
+  background: #38202b;
+}
+
+button.equals {
+  background: linear-gradient(135deg, #3985ff, #2457d8);
+  color: white;
+  font-size: 25px;
+}
+
+button.zero {
+  grid-column: span 2;
+}
+
+.history {
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.history-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.history-head button {
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.history-list {
+  max-height: 130px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  color: var(--muted);
+  font-size: 12px;
+  border-bottom: 1px solid #ffffff08;
+  overflow-wrap: anywhere;
+}
+
+.history-item strong {
+  color: var(--text);
+  text-align: right;
+}
+
+.footer {
+  text-align: center;
+  color: #65738b;
+  font-size: 11px;
+  margin-top: 18px;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 360px) {
+  .calculator { padding: 13px; }
+  .keys { gap: 7px; }
+  button.key { height: 51px; border-radius: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+  <header class="header">
+    <div>
+      <div class="logo">HAZE<span>l</span></div>
+      <div class="subtitle">SCIENTIFIC CALCULATOR</div>
+    </div>
+    <div class="status">● ONLINE</div>
+  </header>
+
+  <section class="calculator">
+
+    <div class="display" aria-live="polite">
+      <div class="previous" id="previous"></div>
+      <div class="current" id="current">0</div>
+    </div>
+
+    <div class="modebar">
+      <span>Precision • Scientific Mode</span>
+      <button id="angleMode" onclick="toggleAngle()">DEG</button>
+    </div>
+
+    <div class="keys">
+      <button class="key function" onclick="scientific('sin')">sin</button>
+      <button class="key function" onclick="scientific('cos')">cos</button>
+      <button class="key function" onclick="scientific('tan')">tan</button>
+      <button class="key function" onclick="scientific('log')">log</button>
+
+      <button class="key function" onclick="scientific('ln')">ln</button>
+      <button class="key function" onclick="scientific('sqrt')">√</button>
+      <button class="key function" onclick="scientific('square')">x²</button>
+      <button class="key function" onclick="append('^')">xʸ</button>
+
+      <button class="key clear" onclick="clearAll()">AC</button>
+      <button class="key function" onclick="backspace()">⌫</button>
+      <button class="key function" onclick="append('(')">(</button>
+      <button class="key function" onclick="append(')')">)</button>
+
+      <button class="key" onclick="append('7')">7</button>
+      <button class="key" onclick="append('8')">8</button>
+      <button class="key" onclick="append('9')">9</button>
+      <button class="key operator" onclick="append('/')">÷</button>
+
+      <button class="key" onclick="append('4')">4</button>
+      <button class="key" onclick="append('5')">5</button>
+      <button class="key" onclick="append('6')">6</button>
+      <button class="key operator" onclick="append('*')">×</button>
+
+      <button class="key" onclick="append('1')">1</button>
+      <button class="key" onclick="append('2')">2</button>
+      <button class="key" onclick="append('3')">3</button>
+      <button class="key operator" onclick="append('-')">−</button>
+
+      <button class="key function" onclick="append('%')">%</button>
+      <button class="key zero" onclick="append('0')">0</button>
+      <button class="key operator" onclick="append('+')">+</button>
+
+      <button class="key function" onclick="append('π')">π</button>
+      <button class="key function" onclick="append('e')">e</button>
+      <button class="key" onclick="append('.')">.</button>
+      <button class="key equals" onclick="calculate()">=</button>
+    </div>
+
+    <section class="history">
+      <div class="history-head">
+        <span>Recent calculations</span>
+        <button onclick="clearHistory()">Clear history</button>
+      </div>
+      <div class="history-list" id="history">
+        <div class="history-item">Your calculations will appear here.</div>
+      </div>
+    </section>
+
+  </section>
+
+  <footer class="footer">
+    HAZEl • PRECISION IN EVERY CALCULATION
+  </footer>
+</main>
+
+<script>
+const current = document.getElementById("current");
+const previous = document.getElementById("previous");
+const historyBox = document.getElementById("history");
+
+let expression = "";
+let justCalculated = false;
+let angle = "DEG";
+let history = [];
+
+function render() {
+  current.textContent = expression || "0";
+}
+
+function append(value) {
+  if (justCalculated) {
+    if (/^[0-9.]$/.test(value) || value === "π" || value === "e") {
+      expression = "";
+    }
+    justCalculated = false;
+  }
+
+  if (expression.length >= 180) return;
+  expression += value;
+  render();
+}
+
+function clearAll() {
+  expression = "";
+  previous.textContent = "";
+  justCalculated = false;
+  render();
+}
+
+function backspace() {
+  expression = expression.slice(0, -1);
+  justCalculated = false;
+  render();
+}
+
+function toggleAngle() {
+  angle = angle === "DEG" ? "RAD" : "DEG";
+  document.getElementById("angleMode").textContent = angle;
+}
+
+function toRadians(n) {
+  return angle === "DEG" ? n * Math.PI / 180 : n;
+}
+
+/* Safe expression parser: no eval() or Function() */
+function evaluate(input) {
+  const s = input.replace(/\s/g, "");
+  let i = 0;
+
+  function peek() {
+    return s[i];
+  }
+
+  function eat(char) {
+    if (s[i] === char) {
+      i++;
+      return true;
+    }
+    return false;
+  }
+
+  function number() {
+    const start = i;
+    let dots = 0;
+
+    while (i < s.length && /[0-9.]/.test(s[i])) {
+      if (s[i] === ".") dots++;
+      if (dots > 1) throw Error("Invalid number");
+      i++;
+    }
+
+    if (start === i) throw Error("Number expected");
+    const n = Number(s.slice(start, i));
+    if (!Number.isFinite(n)) throw Error("Invalid number");
+    return n;
+  }
+
+  function primary() {
+    if (eat("+")) return unary();
+    if (eat("-")) return -unary();
+
+    if (eat("(")) {
+      const v = addSub();
+      if (!eat(")")) throw Error("Missing )");
+      return v;
+    }
+
+    if (eat("π")) return Math.PI;
+    if (eat("e")) return Math.E;
+
+    return number();
+  }
+
+  function power() {
+    let a = primary();
+    if (eat("^")) a = Math.pow(a, unary());
+    return a;
+  }
+
+  function unary() {
+    return power();
+  }
+
+  function multiply() {
+    let a = unary();
+
+    while (true) {
+      if (eat("*")) a *= unary();
+      else if (eat("/")) {
+        const b = unary();
+        if (b === 0) throw Error("Division by zero");
+        a /= b;
+      } else if (eat("%")) {
+        a /= 100;
+      } else break;
+
+      if (!Number.isFinite(a)) throw Error("Invalid result");
+    }
+    return a;
+  }
+
+  function addSub() {
+    let a = multiply();
+
+    while (true) {
+      if (eat("+")) a += multiply();
+      else if (eat("-")) a -= multiply();
+      else break;
+
+      if (!Number.isFinite(a)) throw Error("Invalid result");
+    }
+    return a;
+  }
+
+  if (!s) throw Error("Enter a calculation");
+
+  const result = addSub();
+  if (i !== s.length) throw Error("Invalid expression");
+  if (!Number.isFinite(result)) throw Error("Invalid result");
+  return result;
+}
+
+function format(n) {
+  if (Object.is(n, -0)) n = 0;
+  return Number(n.toPrecision(12)).toString();
+}
+
+function calculate() {
+  try {
+    const original = expression;
+    const result = evaluate(expression);
+    const formatted = format(result);
+
+    previous.textContent = original + " =";
+    expression = formatted;
+    current.textContent = formatted;
+    justCalculated = true;
+
+    history.unshift({ original, result: formatted });
+    history = history.slice(0, 20);
+    renderHistory();
+  } catch (err) {
+    previous.textContent = err.message || "Invalid expression";
+  }
+}
+
+function scientific(fn) {
+  try {
+    const n = evaluate(expression);
+    let result;
+
+    switch (fn) {
+      case "sin": result = Math.sin(toRadians(n)); break;
+      case "cos": result = Math.cos(toRadians(n)); break;
+      case "tan":
+        if (angle === "DEG" &&
+            Math.abs(Math.cos(toRadians(n))) < 1e-12) {
+          throw Error("Undefined result");
+        }
+        result = Math.tan(toRadians(n));
+        break;
+      case "log":
+        if (n <= 0) throw Error("log requires a positive number");
+        result = Math.log10(n);
+        break;
+      case "ln":
+        if (n <= 0) throw Error("ln requires a positive number");
+        result = Math.log(n);
+        break;
+      case "sqrt":
+        if (n < 0) throw Error("Invalid square root");
+        result = Math.sqrt(n);
+        break;
+      case "square": result = n * n; break;
+    }
+
+    if (!Number.isFinite(result)) throw Error("Invalid result");
+
+    previous.textContent = fn + "(" + format(n) + ")";
+    expression = format(result);
+    current.textContent = expression;
+    justCalculated = true;
+  } catch (err) {
+    previous.textContent = err.message || "Invalid expression";
+  }
+}
+
+function renderHistory() {
+  historyBox.innerHTML = "";
+
+  if (!history.length) {
+    historyBox.textContent = "No calculations yet.";
+    return;
+  }
+
+  history.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "history-item";
+
+    const left = document.createElement("span");
+    left.textContent = item.original;
+
+    const right = document.createElement("strong");
+    right.textContent = item.result;
+
+    row.append(left, right);
+    historyBox.appendChild(row);
+  });
+}
+
+function clearHistory() {
+  history = [];
+  renderHistory();
+}
+
+document.addEventListener("keydown", event => {
+  if (/^[0-9.]$/.test(event.key)) append(event.key);
+  else if (["+", "-", "*", "/", "(", ")", "^", "%"].includes(event.key))
+    append(event.key);
+  else if (event.key === "Enter" || event.key === "=") {
+    event.preventDefault();
+    calculate();
+  }
+  else if (event.key === "Backspace") backspace();
+  else if (event.key === "Escape") clearAll();
+});
+</script>
+</body>
+                                                                    </html>
+                                                                    
